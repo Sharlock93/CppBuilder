@@ -1,0 +1,8 @@
+{
+    "include_dir": [
+        "C:\\dev\\lib\\include\\Shar",
+        "C:\\dev\\lib\\include\\GLFW"
+    ],
+
+    "main_file": "App.exe"
+}
