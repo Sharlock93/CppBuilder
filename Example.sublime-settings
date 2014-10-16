@@ -1,7 +1,15 @@
 {
     "include_dir": [
-        "C:\\dev\\lib\\include\\Shar",
-        "C:\\dev\\lib\\include\\GLFW"
+    ], //header files
+
+    "lib_dir": [
+        "yolo",
+        "lol2"
+    ],
+
+    "lib_names": [
+        "woot?",
+        "lolws"
     ],
 
     "main_file": "App.exe"
