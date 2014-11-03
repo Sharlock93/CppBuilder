@@ -1,16 +1,26 @@
 {
     "include_dir": [
+        "C:\\dev\\lib\\include"
     ], //header files
 
     "lib_dir": [
-        "yolo",
-        "lol2"
+        "C:\\dev\\lib\\lib-glew\\Release\\x64",
+        "C:\\dev\\lib\\lib-mingw"
     ],
 
+    //-lglfw3 -lglew32s -lopengl32  -lgdi32
     "lib_names": [
-        "woot?",
-        "lolws"
+        "glfw3",
+        "glew32s",
+        "opengl32",
+        "gdi32"
     ],
 
-    "main_file": "App.exe"
+    "main_file": "App.exe",
+
+    "additional_flags": [
+        "Hoo",
+        "Wall",
+        "G"
+    ]
 }

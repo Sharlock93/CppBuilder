@@ -14,7 +14,9 @@ class Makerfile():
     variables = {}
 
     def __init__(self):
-        pass
+        Makerfile.target = {}
+        Makerfile.recipe = {}
+        Makerfile.variables = {}
 
     def insert_rule(self, rule_name, *rule_values):
         Makerfile.target[rule_name] = rule_values
@@ -30,9 +32,6 @@ class Makerfile():
         pass
 
     def getrange(self, lists):
-        test = 0
-        lea = "dh"
-
         for i, k in enumerate(lists):
             if k.endswith(".h"):
                 return i
@@ -54,8 +53,18 @@ class Makerfile():
             Makerfile.variables[var_name] = var_value
 
     def insert_command(self, tar, command):
-        if Makerfile.target.get(tar) != None:
-            Makerfile.recipe[tar] = command
+
+        print("t " + tar)
+        print("inmake " + str(Makerfile.recipe.get(tar)))
+        print("infuc " + command)
+        print("\n")
+
+        # check for existence & no duplication
+        if (Makerfile.recipe.get(tar) != None and (Makerfile.recipe.get(tar).find(command) == -1)):
+            Makerfile.recipe[tar] += " " + command
+            return
+
+        Makerfile.recipe[tar] = command
 
     def test(self):
         make = ""
@@ -65,7 +74,6 @@ class Makerfile():
             if(type(Makerfile.variables[x]) is list):
                 if x == "HDRDIR":
                     make += x + " = -I" + " -I".join(Makerfile.variables[x])
-                    # print(" -I".join(Makerfile.variables[x]))
                 else:
                     make += x + " = " + " ".join(Makerfile.variables[x])
 
@@ -78,14 +86,20 @@ class Makerfile():
 
         settings = sublime.load_settings("Example.sublime-settings")
 
-        make += settings.get("main_file") + \
-            " : $(OBJ) \n\t g++ $(OBJ) -o " + \
-            settings.get("main_file") + "\n\n"
+        mf = settings.get("main_file")  # main file
+        make += mf + ": $(OBJ) \n\t$(CC) $(FLAGS) $(OBJ) -o " + mf
+
+        if Makerfile.variables.get("LIBS"):
+            make += " $(LIBS)"
+
+        if Makerfile.variables.get("LIBS_DIR"):
+            make += " $(LIBS_DIR)"
+
+        make += "\n\n"
 
         # insert the rules
         for l in Makerfile.target:
             make += l + ": " + " ".join(Makerfile.target[l])
-
             if Makerfile.recipe.get(l) != None:
                 make += "\n\t" + Makerfile.recipe[l]
 
@@ -95,25 +109,22 @@ class Makerfile():
 
     def generate_recipe(self, var_list):
         if type(var_list) != list:
-            cmd = ["g++", "-MM", "-MG", var_list]
+            cmd = ["g++", "-MM", "-MG", "-std=gnu++11", var_list]
             output = s.check_output(cmd)
             return output
 
     def process_cpp(self, list_cpp):
-        for l in list_cpp:
-            les = self.generate_recipe(
-                l).decode().replace(" \\\r\n", "").strip().split(":")[1].strip()
-            les = les.split(" ")
-            mach = self.getrange(les)
-            les = " ".join(les[0:mach])
 
-            self.insert_rule(l.replace(".cpp", ".o"), les)
+        print(list_cpp)
+
+        for l in list_cpp:
+            mktarg = l.replace(".cpp", ".o")
+
+            self.insert_rule(mktarg, l)
+            self.insert_command(mktarg, "$(CC) $(FLAGS) " + l)
+
             if Makerfile.variables.get("HDRDIR"):
-                self.insert_command(
-                    l.replace(".cpp", ".o"), "$(COMMANDC) " + les + " $(HDRDIR)")
-            else:
-                self.insert_command(
-                    l.replace(".cpp", ".o"), "$(COMMANDC) " + les)
+                self.insert_command(mktarg, "$(HDRDIR)")
 
 
 class ExampleCommand(sublime_plugin.TextCommand):
@@ -124,15 +135,35 @@ class ExampleCommand(sublime_plugin.TextCommand):
         os.chdir(os.path.dirname(self.view.file_name()))
 
         res = glob.glob("*.cpp")
+        if res:
+            print(res)
+
         woot = Makerfile()
         name = test.get("main_file")
-        print(res)
+
         woot.insert_variable("source", res)
         woot.insert_variable("OBJ", "$(subst .cpp,.o,$(SOURCE))")
-        print(test.get("include_dir"))
+
         if test.get("include_dir"):
             woot.insert_variable("HDRDIR", test.get("include_dir"))
-        woot.insert_variable("commandC", "g++ -c -std=gnu++11")
+
+        if test.get("lib_names"):
+            woot.insert_variable(
+                "LIBS", "-l" + " -l".join(test.get("lib_names")))
+
+        if test.get("additional_flags"):
+            woot.insert_variable(
+                "FLAGS", "-" + " -".join(test.get("additional_flags")) + " ")
+
+        woot.insert_variable("CC", "g++")
+
+        woot.insert_variable(
+            "FLAGS", "-std=gnu++11 -D__USE_MINGW_ANSI_STDIO=1")
+
+        if test.get("lib_dir"):
+            woot.insert_variable(
+                "LIBS_DIR", "-L" + " -L".join(test.get("lib_dir")))
+
         woot.process_cpp(res)
         woot._generate_make()
 
@@ -141,3 +172,7 @@ class TestCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
         print(Makerfile.target)
+        print("\nrec>>>>\n")
+        print(Makerfile.recipe)
+        print("\nvar>>>>\n")
+        print(Makerfile.variables)

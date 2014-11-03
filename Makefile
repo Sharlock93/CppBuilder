@@ -1,14 +1,10 @@
-HDRDIR = C:\dev\lib\include\Shar C:\dev\lib\include\GLFW s C:\dev\lib\include\Shar C:\dev\lib\include\GLFW s
-OBJ = $(subst .cpp,.o,$(SOURCE))$(subst .cpp,.o,$(SOURCE))
-SOURCE = hjhj.cpp somelib.cpp
-COMMANDC = g++ -cg++ -c
+SOURCE = 
+OBJ = $(subst .cpp,.o,$(SOURCE))
+LIBS = -lglfw3 -lglew32s -lopengl32 -lgdi32
+HDRDIR = -IC:\dev\lib\include
+LIBS_DIR = -LC:\dev\lib\lib-glew\Release\x64 -LC:\dev\lib\lib-mingw
+COMMANDC = g++ -c -std=gnu++11
 
-App.exe : $(OBJ) 
-	 g++ $(OBJ) -o App.exe
-
-hjhj.o: hjhj.cpp
-	$(COMMANDC) hjhj.cpp
-
-somelib.o: somelib.cpp
-	$(COMMANDC) somelib.cpp
+App.exe: $(OBJ) 
+	g++ $(OBJ) -o App.exe $(LIBS) $(LIBS_DIR)
 
