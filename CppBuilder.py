@@ -54,12 +54,7 @@ class Makerfile():
 
     def insert_command(self, tar, command):
 
-        print("t " + tar)
-        print("inmake " + str(Makerfile.recipe.get(tar)))
-        print("infuc " + command)
-        print("\n")
-
-        # check for existence & no duplication
+        # check for existence & no duplication for the commands
         if (Makerfile.recipe.get(tar) != None and (Makerfile.recipe.get(tar).find(command) == -1)):
             Makerfile.recipe[tar] += " " + command
             return
@@ -82,9 +77,12 @@ class Makerfile():
 
             make += "\n"
 
+        # woot.insert_variable("OBJ", "$(subst .cpp,.o,$(SOURCE))")
+        make += "OBJ = $(subst .cpp,.o,$(SOURCE))\n"
+
         make += "\n"
 
-        settings = sublime.load_settings("Example.sublime-settings")
+        settings = sublime.load_settings("CppBuilder.sublime-settings")
 
         mf = settings.get("main_file")  # main file
         make += mf + ": $(OBJ) \n\t$(CC) $(FLAGS) $(OBJ) -o " + mf
@@ -121,16 +119,16 @@ class Makerfile():
             mktarg = l.replace(".cpp", ".o")
 
             self.insert_rule(mktarg, l)
-            self.insert_command(mktarg, "$(CC) $(FLAGS) " + l)
+            self.insert_command(mktarg, "$(CC) $(FLAGS) -c " + l)
 
             if Makerfile.variables.get("HDRDIR"):
                 self.insert_command(mktarg, "$(HDRDIR)")
 
 
-class ExampleCommand(sublime_plugin.TextCommand):
+class CppBuilderCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
-        test = sublime.load_settings("Example.sublime-settings")
+        test = sublime.load_settings("CppBuilder.sublime-settings")
 
         os.chdir(os.path.dirname(self.view.file_name()))
 
@@ -142,7 +140,6 @@ class ExampleCommand(sublime_plugin.TextCommand):
         name = test.get("main_file")
 
         woot.insert_variable("source", res)
-        woot.insert_variable("OBJ", "$(subst .cpp,.o,$(SOURCE))")
 
         if test.get("include_dir"):
             woot.insert_variable("HDRDIR", test.get("include_dir"))

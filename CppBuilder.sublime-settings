@@ -19,8 +19,6 @@
     "main_file": "App.exe",
 
     "additional_flags": [
-        "Hoo",
-        "Wall",
-        "G"
+        "Wall"
     ]
 }
