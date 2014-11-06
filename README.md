@@ -5,7 +5,8 @@ A very Simple plugin to make Makefiles, still in pre-Alpha testing
 
 makes simple make files..
 
-*Keys*
+**Keys**
+
 Ctrl+Alt+M while a C++ file is open will run the command on windows, Haven't tested it on Mac or Linux yet...
 the command will make a Makefile in the same directory of the C++ file.
 
