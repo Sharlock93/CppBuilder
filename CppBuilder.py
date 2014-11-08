@@ -6,6 +6,8 @@ import glob
 import fileinput
 import sys
 import subprocess as s
+import shutil
+import zipfile
 
 
 class Makerfile():
@@ -129,7 +131,6 @@ class CppBuilderCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
         test = sublime.load_settings("CppBuilder.sublime-settings")
-
         os.chdir(os.path.dirname(self.view.file_name()))
 
         res = glob.glob("*.cpp")
@@ -163,13 +164,16 @@ class CppBuilderCommand(sublime_plugin.TextCommand):
 
         woot.process_cpp(res)
         woot._generate_make()
+        # oas = sublime.active_window()
+        # oas.open_file("Makefile")
 
 
-class TestCommand(sublime_plugin.TextCommand):
-
-    def run(self, edit):
-        print(Makerfile.target)
-        print("\nrec>>>>\n")
-        print(Makerfile.recipe)
-        print("\nvar>>>>\n")
-        print(Makerfile.variables)
+def plugin_loaded():
+    ls = sublime.packages_path()
+    p = os.path.isfile(ls + "\\User\\CppBuilder.sublime-settings")
+    if not p:
+        k = os.chdir(ls)
+        os.chdir("..")
+        os.chdir("Installed Packages")
+        t = zipfile.ZipFile("CppBuilder.sublime-package")
+        out = t.extract("CppBuilder.sublime-settings", path=ls + "\\User\\")

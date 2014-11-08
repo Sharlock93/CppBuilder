@@ -4,8 +4,7 @@
     ], //header files
 
     "lib_dir": [
-        "C:\\dev\\lib\\lib-glew\\Release\\x64",
-        "C:\\dev\\lib\\lib-mingw"
+        "C:\\dev\\lib\\lib-glew\\Release\\x64"
     ],
 
     //-lglfw3 -lglew32s -lopengl32  -lgdi32

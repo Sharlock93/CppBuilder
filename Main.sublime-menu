@@ -19,7 +19,13 @@
                                 "caption": "CppBuilder Settings - Default",
                                 "command": "open_file",
                                 "args": {"file": "${packages}/CppBuilder/CppBuilder.sublime-settings"}
+                            },
+                            {
+                                "caption": "CppBuilder Settings - User",
+                                "command": "open_file",
+                                "args": {"file": "${packages}/User/CppBuilder.sublime-settings"}
                             }
+
                         ]
                     }
                 ],
