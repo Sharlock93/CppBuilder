@@ -11,11 +11,16 @@
     "lib_names": [
     ],
 
-    //the name of the file to generate (the final exe)
-    "main_file": "App.exe",
+    //the name of the file to generate (the final executable )
+    "main_file": "",
+
+    //.o output folder
+    "obj_dir": "obj",
 
     //additional flags for the compiler
     "additional_flags": [
-        "Wall"
+        "Wall",
+        "std=gnu++11",
+        "D__USE_MINGW_ANSI_STDIO=1"
     ]
 }

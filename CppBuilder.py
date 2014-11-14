@@ -1,11 +1,9 @@
 import sublime
 import sublime_plugin
-import re
 import os
 import glob
 import fileinput
 import sys
-import subprocess as s
 import shutil
 import zipfile
 
@@ -14,13 +12,20 @@ class Makerfile():
     target = {}  # for targets
     recipe = {}
     variables = {}
+    output_file = "output"
 
     def __init__(self):
         Makerfile.target = {}
         Makerfile.recipe = {}
         Makerfile.variables = {}
+        Makerfile.output_file = "output"
 
-    def insert_rule(self, rule_name, *rule_values):
+        if sys.platform == "win32":
+            Makerfile.output_file += ".exe"
+        else:
+            Makerfile.output_file += ".out"
+
+    def insert_target(self, rule_name, *rule_values):
         Makerfile.target[rule_name] = rule_values
 
     def get_rule(self, rule_name):
@@ -40,9 +45,9 @@ class Makerfile():
             if k.endswith(".hpp"):
                 return i
 
-    def _generate_make(self):
+    def generate_make(self):
         f = open("Makefile", "w")
-        f.write(self.test())
+        f.write(self.makestr())
         f.close()
 
     def insert_variable(self, var_name, var_value):
@@ -63,31 +68,39 @@ class Makerfile():
 
         Makerfile.recipe[tar] = command
 
-    def test(self):
+    def makestr(self):
+        settings = sublime.load_settings("CppBuilder.sublime-settings")
+
         make = ""
 
         # insert varibales
         for x in Makerfile.variables:
-            if(type(Makerfile.variables[x]) is list):
-                if x == "HDRDIR":
-                    make += x + " = -I" + " -I".join(Makerfile.variables[x])
-                else:
-                    make += x + " = " + " ".join(Makerfile.variables[x])
-
+            if x == "SOURCE":
+                make += x + " = " + "$(wildcard *.cpp)"
             else:
                 make += x + " = " + Makerfile.variables[x]
 
             make += "\n"
 
-        # woot.insert_variable("OBJ", "$(subst .cpp,.o,$(SOURCE))")
-        make += "OBJ = $(subst .cpp,.o,$(SOURCE))\n"
+        obj_dir = settings.get("obj_dir")
+
+        if obj_dir:
+            make += "OBJ = $(subst .cpp,.o,$(addprefix " + \
+                obj_dir + "/,$(SOURCE)))\n"
+        else:
+            make += "OBJ = $(subst .cpp,.o,$(SOURCE))\n"
 
         make += "\n"
 
-        settings = sublime.load_settings("CppBuilder.sublime-settings")
-
+        # if Makerfile.output_file:
         mf = settings.get("main_file")  # main file
-        make += mf + ": $(OBJ) \n\t$(CC) $(FLAGS) $(OBJ) -o " + mf
+
+        if mf:
+            make += mf + ": $(OBJ) \n\t$(CC) $(FLAGS) $(OBJ) -o " + mf
+        else:
+            make += Makerfile.output_file + \
+                ": $(OBJ) \n\t$(CC) $(FLAGS) $(OBJ) -o " + \
+                Makerfile.output_file
 
         if Makerfile.variables.get("LIBS"):
             make += " $(LIBS)"
@@ -98,10 +111,15 @@ class Makerfile():
         make += "\n\n"
 
         # insert the rules
-        for l in Makerfile.target:
-            make += l + ": " + " ".join(Makerfile.target[l])
-            if Makerfile.recipe.get(l) != None:
-                make += "\n\t" + Makerfile.recipe[l]
+        for targ in Makerfile.target:
+            strtmp = " ".join(Makerfile.target[targ])
+            if obj_dir:
+                make += obj_dir + "/" + targ + ": " + strtmp
+            else:
+                make += targ + ": " + strtmp
+
+            if Makerfile.recipe.get(targ) != None:
+                make += "\n\t " + Makerfile.recipe[targ]
 
             make += "\n\n"
 
@@ -117,63 +135,67 @@ class Makerfile():
 
         print(list_cpp)
 
+        obj_dir = sublime.load_settings(
+            "CppBuilder.sublime-settings").get("obj_dir")
+
         for l in list_cpp:
             mktarg = l.replace(".cpp", ".o")
 
-            self.insert_rule(mktarg, l)
+            self.insert_target(mktarg, l)
             self.insert_command(mktarg, "$(CC) $(FLAGS) -c " + l)
+
+            if obj_dir:
+                self.insert_command(mktarg, "-o " + obj_dir + "/" + mktarg)
 
             if Makerfile.variables.get("HDRDIR"):
                 self.insert_command(mktarg, "$(HDRDIR)")
+
+    def variable_process(self, settings):
+
+        if settings.get("include_dir"):
+            self.insert_variable(
+                "HDRDIR", "-I" + " -I".join(settings.get("include_dir")))
+
+        self.insert_variable("CC", "g++")
+
+        if settings.get("lib_names"):
+            self.insert_variable(
+                "LIBS", "-l" + " -l".join(settings.get("lib_names")))
+
+        if settings.get("additional_flags"):
+            self.insert_variable(
+                "FLAGS", "-" + " -".join(settings.get("additional_flags")) + " ")
+
+        if settings.get("lib_dir"):
+            self.insert_variable(
+                "LIBS_DIR", "-L" + " -L".join(settings.get("lib_dir")))
 
 
 class CppBuilderCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
-        test = sublime.load_settings("CppBuilder.sublime-settings")
+        stgname = "CppBuilder.sublime-settings"
+
         os.chdir(os.path.dirname(self.view.file_name()))
 
-        res = glob.glob("*.cpp")
-        if res:
-            print(res)
+        settings = sublime.load_settings(stgname)
 
-        woot = Makerfile()
-        name = test.get("main_file")
+        maker = Makerfile()
+        source_files = glob.glob("*.cpp")
 
-        woot.insert_variable("source", res)
-
-        if test.get("include_dir"):
-            woot.insert_variable("HDRDIR", test.get("include_dir"))
-
-        if test.get("lib_names"):
-            woot.insert_variable(
-                "LIBS", "-l" + " -l".join(test.get("lib_names")))
-
-        if test.get("additional_flags"):
-            woot.insert_variable(
-                "FLAGS", "-" + " -".join(test.get("additional_flags")) + " ")
-
-        woot.insert_variable("CC", "g++")
-
-        woot.insert_variable(
-            "FLAGS", "-std=gnu++11 -D__USE_MINGW_ANSI_STDIO=1")
-
-        if test.get("lib_dir"):
-            woot.insert_variable(
-                "LIBS_DIR", "-L" + " -L".join(test.get("lib_dir")))
-
-        woot.process_cpp(res)
-        woot._generate_make()
-        # oas = sublime.active_window()
-        # oas.open_file("Makefile")
+        maker.insert_variable("source", source_files)
+        maker.variable_process(settings)
+        maker.process_cpp(source_files)
+        maker.generate_make()
+        oas = sublime.active_window().open_file("Makefile")
 
 
 def plugin_loaded():
     ls = sublime.packages_path()
-    p = os.path.isfile(ls + "\\User\\CppBuilder.sublime-settings")
+    p = os.path.isfile(ls + "//User//CppBuilder.sublime-settings")
     if not p:
         k = os.chdir(ls)
         os.chdir("..")
         os.chdir("Installed Packages")
         t = zipfile.ZipFile("CppBuilder.sublime-package")
-        out = t.extract("CppBuilder.sublime-settings", path=ls + "\\User\\")
+        out = t.extract("CppBuilder.sublime-settings", path=ls + "//User//")
