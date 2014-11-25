@@ -175,13 +175,14 @@ class CppBuilderCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
         stgname = "CppBuilder.sublime-settings"
+        settings = sublime.load_settings(stgname)
+        maker = Makerfile()
+        source_files = glob.glob("*.cpp")
 
         os.chdir(os.path.dirname(self.view.file_name()))
 
-        settings = sublime.load_settings(stgname)
-
-        maker = Makerfile()
-        source_files = glob.glob("*.cpp")
+        if not os.path.isdir(settings.get("obj_dir")):
+            os.mkdir(settings.get("obj_dir"))
 
         maker.insert_variable("source", source_files)
         maker.variable_process(settings)
