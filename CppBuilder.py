@@ -185,6 +185,7 @@ class CppBuilderCommand(sublime_plugin.TextCommand):
 
         if not os.path.isdir(settings.get("obj_dir")):
             os.mkdir(settings.get("obj_dir"))
+        print(os.path.isdir(settings.get("obj_dir")))
 
         maker.insert_variable("source", source_files)
         maker.variable_process(settings)
