@@ -12,10 +12,14 @@ the command will make a Makefile in the same directory of the C++ file.
 
 For now, make a copy of the CppBuilder.sublime-settings file in your User folder (Accessed through Prefrences > Browse Packages) and make changes to the files and test it out...
 
-**Goals**
--Add per project setting handling.
--Gather the different files under different folders, i.e.: .o into obj folder, .cpp into src...etc.
--Helpful tool.
+**Goals**  
+
+-Add per project setting handling.  
+
+-Gather the different files under different folders, i.e.: .o into obj folder, .cpp into src...etc.  
+
+-Helpful tool.  
+
 
 
 
