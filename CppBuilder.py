@@ -177,9 +177,9 @@ class CppBuilderCommand(sublime_plugin.TextCommand):
         stgname = "CppBuilder.sublime-settings"
         settings = sublime.load_settings(stgname)
         maker = Makerfile()
-        source_files = glob.glob("*.cpp")
-
         os.chdir(os.path.dirname(self.view.file_name()))
+
+        source_files = glob.glob("*.cpp")
 
         print(os.path.isdir(settings.get("obj_dir")))
 
