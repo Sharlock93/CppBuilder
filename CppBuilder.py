@@ -181,6 +181,8 @@ class CppBuilderCommand(sublime_plugin.TextCommand):
 
         os.chdir(os.path.dirname(self.view.file_name()))
 
+        print(os.path.isdir(settings.get("obj_dir")))
+
         if not os.path.isdir(settings.get("obj_dir")):
             os.mkdir(settings.get("obj_dir"))
 
