@@ -1,5 +1,18 @@
 [
     {
+        "caption": "Project",
+        "id": "project",
+        "mnemonic": "t",
+        "children":
+        [
+            {
+                "caption":"New C++ Project",
+                "command":"test"
+            }
+        ]
+    },
+
+    {
         "caption": "Preferences",
         "mnemonic": "n",
         "id": "preferences",
