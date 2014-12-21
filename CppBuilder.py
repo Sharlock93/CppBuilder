@@ -36,6 +36,7 @@ class TestCommand(sublime_plugin.TextCommand):
        tes = os.path.expandvars("$USERPROFILE//CppBuilder//").replace("\\", "//")
        os.chdir(tes)
        print(os.listdir())
+       print("hello world")
 
 def plugin_loaded():
     #check if settigns file exists if not, extract one from the package file downloaded.
