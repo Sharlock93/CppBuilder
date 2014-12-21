@@ -1,11 +1,5 @@
 import sublime
-import sublime_plugin
-import os
-import glob
-import fileinput
 import sys
-import shutil
-import zipfile
 
 
 class Makerfile():

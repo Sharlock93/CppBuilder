@@ -9,6 +9,7 @@ import zipfile
 
 from CppBuilder.MakerClass import Makerfile
 
+
 class CppBuilderCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
@@ -19,7 +20,6 @@ class CppBuilderCommand(sublime_plugin.TextCommand):
 
         source_files = glob.glob("*.cpp")
 
-        print(not settings.get("obj_dir"))
         if (settings.get("obj_dir") and not os.path.isdir(settings.get("obj_dir"))):
             os.mkdir(settings.get("obj_dir"))
 
@@ -28,19 +28,17 @@ class CppBuilderCommand(sublime_plugin.TextCommand):
         maker.process_cpp(source_files)
         maker.generate_make()
         oas = sublime.active_window().open_file("Makefile")
-
+        os.access
 
 class TestCommand(sublime_plugin.TextCommand):
+
     def run(self, edit):
-        # print("hello")
-        test = sublime.active_window()
-        laks = {}
-        print(laks)
-        laks["folders"] = [{"path":"Waht", "jep"}]
-        # laks[] = ""
-        test.set_project_data(laks)
+       tes = os.path.expandvars("$USERPROFILE//CppBuilder//").replace("\\", "//")
+       os.chdir(tes)
+       print(os.listdir())
 
 def plugin_loaded():
+    #check if settigns file exists if not, extract one from the package file downloaded.
     ls = sublime.packages_path()
     p = os.path.isfile(ls + "//User//CppBuilder.sublime-settings")
     if not p:
