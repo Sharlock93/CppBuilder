@@ -7,7 +7,7 @@
         [
             {
                 "caption":"New C++ Project",
-                "command":"test"
+                "command":"new_cpp"
             }
         ]
     },

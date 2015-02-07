@@ -9,10 +9,11 @@ from CppBuilder.MakerClass import Makerfile
 class MakeProjectCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
-        settings = self.get_settings().get("settings")
+        settings = self.get_settings()
         proj_base = self.view.window().folders()[0]
 
         src = proj_base + "\\src"
+        print(settings)
 
         maker = Makerfile(settings, src, "obj", "build", "header")
         makefile = proj_base + "\\Makefile"
@@ -25,6 +26,7 @@ class MakeProjectCommand(sublime_plugin.TextCommand):
 
     def get_settings(self):
         if self.view.settings().get('main_file'):
+            print(self.view.settings().get('main_file'))
             return self.view.settings()
         else:
             project_folder = self.view.window().folders()[0]
@@ -37,7 +39,7 @@ class MakeProjectCommand(sublime_plugin.TextCommand):
         f = open(json_file)
         j = json.load(f)
 
-        print()
+        print(j)
 
         f.close()
-        return j
+        return j.get('settings')
