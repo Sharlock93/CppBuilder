@@ -20,9 +20,9 @@
 
     //output folders
     //the name of the file to generate (the final executable )
-    "main_file": "MyNmaeisBond",
+    "main_file": "",
 
-    "obj_dir": "S:\\Test",
+    "obj_dir": "",
 
     //where to build the final executable
     "build_dir": "",
@@ -41,5 +41,5 @@
     ],
 
     //Default Project Settings
-    "workspace_dir":"S:\\Test\\workspace"
+    "workspace_dir":""
 }
