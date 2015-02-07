@@ -1,5 +1,4 @@
 import sublime
-import sublime_plugin
 import os
 import json
 
@@ -11,17 +10,17 @@ class ProjectHandler:
         self.project_data = {
             "folders": [],
             "settings": {
-                            "include_dir": ["header"],
-                            "lib_dir": [],
-                            "lib_names": [],
-                            "main_file": project_name,
-                            "cc": "g++",
-                            "additional_flags": [
-                                "Wall",
-                                "std=gnu++11",
-                                "D__USE_MINGW_ANSI_STDIO=1"
-                            ],
-                        },
+                "include_dir": ["header"],
+                "lib_dir": [],
+                "lib_names": [],
+                "main_file": project_name,
+                "cc": "g++",
+                "additional_flags": [
+                    "Wall",
+                    "std=gnu++11",
+                    "D__USE_MINGW_ANSI_STDIO=1"
+                ],
+            },
             "build_systems": []
         }
 

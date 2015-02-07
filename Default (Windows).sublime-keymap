@@ -1,3 +1,4 @@
 [
     {"command": "cpp_builder", "keys": ["ctrl+alt+m"]} ,
+    {"command": "make_project", "keys": ["ctrl+alt+n"]}
 ]

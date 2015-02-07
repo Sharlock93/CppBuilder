@@ -1,11 +1,11 @@
 import sys
 import os
 import glob
-import json
 
 
 class Makerfile():
-    def __init__(self, settings,src=None, obj=None, build=None, header=None):
+
+    def __init__(self, settings, src=None, obj=None, build=None, header=None):
         self.makefile = ""
 
         self.variables = {}
@@ -39,7 +39,7 @@ class Makerfile():
 
         return self.makefile
 
-    def handle_variable(self, settings): # variable
+    def handle_variable(self, settings):  # variable
         var_string = ""
         if self.header:
             string = " ".join(self.settings.get("include_dir"))
@@ -61,16 +61,17 @@ class Makerfile():
             self.variables["Library"] = libn
 
             var_string += "LIB_DIR = {}\nLIB = {}\n".format(lib_dir, lib)
-            var_string += "LIB_NAMES = {}\nLIBRARY = {}\n".format(libnames, libn)
+            var_string += "LIB_NAMES = {}\nLIBRARY = {}\n".format(
+                libnames, libn)
 
         if settings.get("additional_flags"):
-            self.variables["CCOPTION"] = " ".join(settings.get("additional_flags"))
+            self.variables["CCOPTION"] = " ".join(
+                settings.get("additional_flags"))
             self.variables["FLAGS"] = "$(addprefix -,$(FLAGS)"
 
-            var_string += "CCOPTION = {}\n".format(self.variables.get("CCOPTION"))
+            var_string += "CCOPTION = {}\n".format(
+                self.variables.get("CCOPTION"))
             var_string += "FLAGS = $(addprefix -,$(CCOPTION))\n"
-
-
 
         if settings.get("cc"):
             self.variables["CC"] = settings.get("cc")
@@ -78,24 +79,26 @@ class Makerfile():
         else:
             var_string += "CC = {}\n".format("g++")
 
-
         if settings.get("projec_name"):
             if sys.platform == "win32":
-                self.variables["main_file"] = settings.get("main_file") + ".exe"
+                self.variables["main_file"] = settings.get(
+                    "main_file") + ".exe"
             else:
-                self.variables["main_file"] = settings.get("main_file") + ".out"
- 
+                self.variables["main_file"] = settings.get(
+                    "main_file") + ".out"
+
         elif settings.get("main_file"):
             if sys.platform == "win32":
-                self.variables["main_file"] = settings.get("main_file") + ".exe"
+                self.variables["main_file"] = settings.get(
+                    "main_file") + ".exe"
             else:
-                self.variables["main_file"] = settings.get("main_file") + ".out"
+                self.variables["main_file"] = settings.get(
+                    "main_file") + ".out"
         else:
             if sys.platform == "win32":
                 self.variables["main_file"] = "output.exe"
             else:
                 self.variables["main_file"] = "output.out"
-
 
         if self.obj:
             var_string += "OBJ_DIR = {}\n".format(self.obj)
@@ -117,11 +120,10 @@ class Makerfile():
 
         return var_string
 
-
     def str_main_file(self):
         string = ""
         if self.build:
-            string += "{2}\\" # build dir
+            string += "{2}\\"  # build dir
 
         string += "{0}: {1} \n\t $(CC) "
 
@@ -133,23 +135,23 @@ class Makerfile():
         else:
             string += "{1} -o {0} "
 
-
         if self.variables.get("LIB"):
             string += "$(LIB) $(LIBRARY)"
 
-        
         if self.obj:
             objs = "$(addprefix $(OBJ_DIR)\,$(OBJ))"
         else:
             objs = "$(OBJ)"
 
-        main_exe = string.format(self.variables.get("main_file"), objs, "$(BUILD_DIR)")
+        main_exe = string.format(
+            self.variables.get("main_file"), objs, "$(BUILD_DIR)")
         return main_exe
 
     def get_source_files(self, src_dir):
         back_out = False
         if src_dir:
             try:
+                print(os.getcwd())
                 os.chdir(src_dir)
                 back_out = True
             except FileNotFoundError:
@@ -165,7 +167,8 @@ class Makerfile():
         tempmk = ""
         if self.sources:
             for x in self.sources:
-                tempmk += self.string_template.format(x.replace(".cpp", ".o"), x, "$(OBJ_DIR)", "$(SRC_DIR)")
+                tempmk += self.string_template.format(
+                    x.replace(".cpp", ".o"), x, "$(OBJ_DIR)", "$(SRC_DIR)")
                 tempmk += "\n\n"
             return tempmk
         else:
@@ -176,14 +179,14 @@ class Makerfile():
     def make_string_template(self):
         tmp = ""
         if self.obj:
-            tmp += "{2}\\" # obj dir
+            tmp += "{2}\\"  # obj dir
 
-        tmp += "{0}: " #object .o
+        tmp += "{0}: "  # object .o
 
         if self.src:
-            tmp += "{3}\\" # src dir
+            tmp += "{3}\\"  # src dir
 
-        tmp += "{1} \n\t $(CC) $(FLAGS) -c " # recipe for object
+        tmp += "{1} \n\t $(CC) $(FLAGS) -c "  # recipe for object
 
         # print(self.src)
 
