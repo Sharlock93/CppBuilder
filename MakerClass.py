@@ -1,165 +1,216 @@
-import sublime
 import sys
+import os
+import glob
+import json
 
 
 class Makerfile():
-    target = {}  # for targets
-    recipe = {}
-    variables = {}
-    output_file = "output"
+    def __init__(self, settings,src=None, obj=None, build=None, header=None):
+        self.makefile = ""
 
-    def __init__(self):
-        Makerfile.target = {}
-        Makerfile.recipe = {}
-        Makerfile.variables = {}
-        Makerfile.output_file = "output"
+        self.variables = {}
+        self.output_file = "output"
+        self.string_template = ""
 
         if sys.platform == "win32":
-            Makerfile.output_file += ".exe"
-        else:
-            Makerfile.output_file += ".out"
+            self.output_file += ".exe"
 
-    def insert_target(self, rule_name, *rule_values):
-        Makerfile.target[rule_name] = rule_values
+        self.src = src
+        self.obj = obj
+        self.build = build
+        self.header = header
+        self.sources = self.get_source_files(self.src)
+        self.settings = settings
 
-    def get_rule(self, rule_name):
-        try:
-            return Makerfile.target[rule_name]
-        except KeyError:
-            print("couldn't find a key with that name")
+    def make_file(self):
+
+        if not self.sources:
+            print("No souces provided")
             return None
 
-    def __str__(self):
-        pass
+        self.makefile += self.handle_variable(self.settings)
+        self.make_string_template()
 
-    def getrange(self, lists):
-        for i, k in enumerate(lists):
-            if k.endswith(".h"):
-                return i
-            if k.endswith(".hpp"):
-                return i
+        self.makefile += "\n"
 
-    def generate_make(self):
-        f = open("Makefile", "w")
-        f.write(self.makestr())
-        f.close()
+        self.makefile += self.str_main_file()
 
-    def insert_variable(self, var_name, var_value):
-        var_name = var_name.upper()
-        if Makerfile.variables.get(var_name) != None:
-            if Makerfile.variables[var_name] == var_value:
-                return
-            Makerfile.variables[var_name] += var_value
-        else:
-            Makerfile.variables[var_name] = var_value
+        self.makefile += "\n\n{}\n".format(self.str_recipe_target())
 
-    def insert_command(self, tar, command):
+        return self.makefile
 
-        # check for existence & no duplication for the commands
-        if (Makerfile.recipe.get(tar) != None and (Makerfile.recipe.get(tar).find(command) == -1)):
-            Makerfile.recipe[tar] += " " + command
-            return
+    def handle_variable(self, settings): # variable
+        var_string = ""
+        if self.header:
+            string = " ".join(self.settings.get("include_dir"))
+            header = "$(addprefix -I,$(HDR_DIR))"
+            self.variables["HDR_DIR"] = string
+            self.variables["HEADER"] = header
 
-        Makerfile.recipe[tar] = command
+            var_string += "HDR_DIR = {}\nHEADER = {}\n".format(string, header)
 
-    def makestr(self):
-        settings = sublime.load_settings("CppBuilder.sublime-settings")
+        if settings.get("lib_dir") and settings.get("lib_names"):
+            lib_dir = " ".join(settings.get("lib_dir"))
+            lib = "$(addprefix -L, $(LIB_DIR)"
+            self.variables["LIB_DIR"] = lib_dir
+            self.variables["LIB"] = lib
 
-        make = ""
+            libnames = " ".join(settings.get("lib_names"))
+            libn = "$(addprefix -l,$(LIB_NAMES)"
+            self.variables["LIB_NAMES"] = libnames
+            self.variables["Library"] = libn
 
-        # insert varibales
-        for x in Makerfile.variables:
-            if x == "SOURCE":
-                make += x + " = " + "$(wildcard *.cpp)"
-            else:
-                make += x + " = " + Makerfile.variables[x]
-
-            make += "\n"
-
-        obj_dir = settings.get("obj_dir")
-
-        if obj_dir:
-            make += "OBJ = $(subst .cpp,.o,$(addprefix " + \
-                obj_dir + "/,$(SOURCE)))\n"
-        else:
-            make += "OBJ = $(subst .cpp,.o,$(SOURCE))\n"
-
-        make += "\n"
-
-        # if Makerfile.output_file:
-        mf = settings.get("main_file")  # main file
-
-        if mf:
-            make += mf + ": $(OBJ) \n\t$(CC) $(FLAGS) $(OBJ) -o " + mf
-        else:
-            make += Makerfile.output_file + \
-                ": $(OBJ) \n\t$(CC) $(FLAGS) $(OBJ) -o " + \
-                Makerfile.output_file
-
-        if Makerfile.variables.get("LIBS"):
-            make += " $(LIBS)"
-
-        if Makerfile.variables.get("LIBS_DIR"):
-            make += " $(LIBS_DIR)"
-
-        make += "\n\n"
-
-        # insert the rules
-        for targ in Makerfile.target:
-            strtmp = " ".join(Makerfile.target[targ])
-            if obj_dir:
-                make += obj_dir + "/" + targ + ": " + strtmp
-            else:
-                make += targ + ": " + strtmp
-
-            if Makerfile.recipe.get(targ) != None:
-                make += "\n\t " + Makerfile.recipe[targ]
-
-            make += "\n\n"
-
-        return make
-
-    def generate_recipe(self, var_list):
-        if type(var_list) != list:
-            cmd = ["g++", "-MM", "-MG", "-std=gnu++11", var_list]
-            output = s.check_output(cmd)
-            return output
-
-    def process_cpp(self, list_cpp):
-
-        print(list_cpp)
-
-        obj_dir = sublime.load_settings(
-            "CppBuilder.sublime-settings").get("obj_dir")
-
-        for l in list_cpp:
-            mktarg = l.replace(".cpp", ".o")
-
-            self.insert_target(mktarg, l)
-            self.insert_command(mktarg, "$(CC) $(FLAGS) -c " + l)
-
-            if obj_dir:
-                self.insert_command(mktarg, "-o " + obj_dir + "/" + mktarg)
-
-            if Makerfile.variables.get("HDRDIR"):
-                self.insert_command(mktarg, "$(HDRDIR)")
-
-    def variable_process(self, settings):
-
-        if settings.get("include_dir"):
-            self.insert_variable(
-                "HDRDIR", "-I" + " -I".join(settings.get("include_dir")))
-
-        self.insert_variable("CC", "g++")
-
-        if settings.get("lib_names"):
-            self.insert_variable(
-                "LIBS", "-l" + " -l".join(settings.get("lib_names")))
+            var_string += "LIB_DIR = {}\nLIB = {}\n".format(lib_dir, lib)
+            var_string += "LIB_NAMES = {}\nLIBRARY = {}\n".format(libnames, libn)
 
         if settings.get("additional_flags"):
-            self.insert_variable(
-                "FLAGS", "-" + " -".join(settings.get("additional_flags")) + " ")
+            self.variables["CCOPTION"] = " ".join(settings.get("additional_flags"))
+            self.variables["FLAGS"] = "$(addprefix -,$(FLAGS)"
 
-        if settings.get("lib_dir"):
-            self.insert_variable(
-                "LIBS_DIR", "-L" + " -L".join(settings.get("lib_dir")))
+            var_string += "CCOPTION = {}\n".format(self.variables.get("CCOPTION"))
+            var_string += "FLAGS = $(addprefix -,$(CCOPTION))\n"
+
+
+
+        if settings.get("cc"):
+            self.variables["CC"] = settings.get("cc")
+            var_string += "CC = {}\n".format(settings.get("cc"))
+        else:
+            var_string += "CC = {}\n".format("g++")
+
+
+        if settings.get("projec_name"):
+            if sys.platform == "win32":
+                self.variables["main_file"] = settings.get("main_file") + ".exe"
+            else:
+                self.variables["main_file"] = settings.get("main_file") + ".out"
+ 
+        elif settings.get("main_file"):
+            if sys.platform == "win32":
+                self.variables["main_file"] = settings.get("main_file") + ".exe"
+            else:
+                self.variables["main_file"] = settings.get("main_file") + ".out"
+        else:
+            if sys.platform == "win32":
+                self.variables["main_file"] = "output.exe"
+            else:
+                self.variables["main_file"] = "output.out"
+
+
+        if self.obj:
+            var_string += "OBJ_DIR = {}\n".format(self.obj)
+
+        if self.sources:
+            self.variables["OBJ"] = ""
+            for x in self.sources:
+                self.variables["OBJ"] += x.replace(".cpp", ".o") + " "
+
+            var_string += "OBJ = {}\n".format(self.variables.get("OBJ"))
+
+        if self.build:
+            self.variables["BUILD_DIR"] = self.build
+            var_string += "BUILD_DIR = {}\n".format(self.build)
+
+        if self.src:
+            self.variables["SRC_DIR"] = self.src
+            var_string += "SRC_DIR = {}\n".format(self.src)
+
+        return var_string
+
+
+    def str_main_file(self):
+        string = ""
+        if self.build:
+            string += "{2}\\" # build dir
+
+        string += "{0}: {1} \n\t $(CC) "
+
+        if self.variables.get("FLAGS"):
+            string += "$(FLAGS) "
+
+        if self.build:
+            string += "{1} -o {2}\\{0} "
+        else:
+            string += "{1} -o {0} "
+
+
+        if self.variables.get("LIB"):
+            string += "$(LIB) $(LIBRARY)"
+
+        
+        if self.obj:
+            objs = "$(addprefix $(OBJ_DIR)\,$(OBJ))"
+        else:
+            objs = "$(OBJ)"
+
+        main_exe = string.format(self.variables.get("main_file"), objs, "$(BUILD_DIR)")
+        return main_exe
+
+    def get_source_files(self, src_dir):
+        back_out = False
+        if src_dir:
+            try:
+                os.chdir(src_dir)
+                back_out = True
+            except FileNotFoundError:
+                print("Couldn't find the Folder: ", src_dir)
+
+        file_sources = glob.glob("*.cpp")
+
+        if back_out:
+            os.chdir("..")
+        return file_sources
+
+    def str_recipe_target(self):
+        tempmk = ""
+        if self.sources:
+            for x in self.sources:
+                tempmk += self.string_template.format(x.replace(".cpp", ".o"), x, "$(OBJ_DIR)", "$(SRC_DIR)")
+                tempmk += "\n\n"
+            return tempmk
+        else:
+            print("No Source files found")
+            return None
+
+    # generate a template string based on the variables passed for the object
+    def make_string_template(self):
+        tmp = ""
+        if self.obj:
+            tmp += "{2}\\" # obj dir
+
+        tmp += "{0}: " #object .o
+
+        if self.src:
+            tmp += "{3}\\" # src dir
+
+        tmp += "{1} \n\t $(CC) $(FLAGS) -c " # recipe for object
+
+        # print(self.src)
+
+        if self.src:
+            tmp += "{3}\\"
+
+        tmp += "{1} "
+
+        if self.obj:
+            tmp += "-o {2}\\{0} "
+        else:
+            tmp += "-o {0} "
+
+        if self.variables.get("HEADER"):
+            tmp += "$(HEADER)"
+
+        self.string_template = tmp
+
+    # setter methods
+    def set_src(self, src_dir):
+        self.src = src_dir
+
+    def set_obj(self, obj_dir):
+        self.obj = obj_dir
+
+    def set_build(self, build_dir):
+        self.build = build_dir
+
+    def set_header(self, header_dir):
+        self.header = header_dir
