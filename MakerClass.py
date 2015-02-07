@@ -42,7 +42,6 @@ class Makerfile():
     def handle_variable(self, settings):  # variable
         var_string = ""
         if self.header:
-            print(settings)
             string = " ".join(self.settings.get("include_dir"))
             header = "$(addprefix -I,$(HDR_DIR))"
             self.variables["HDR_DIR"] = string
