@@ -51,12 +51,12 @@ class Makerfile():
 
         if settings.get("lib_dir") and settings.get("lib_names"):
             lib_dir = " ".join(settings.get("lib_dir"))
-            lib = "$(addprefix -L, $(LIB_DIR)"
+            lib = "$(addprefix -L, $(LIB_DIR))"
             self.variables["LIB_DIR"] = lib_dir
             self.variables["LIB"] = lib
 
             libnames = " ".join(settings.get("lib_names"))
-            libn = "$(addprefix -l,$(LIB_NAMES)"
+            libn = "$(addprefix -l,$(LIB_NAMES))"
             self.variables["LIB_NAMES"] = libnames
             self.variables["Library"] = libn
 
@@ -67,7 +67,7 @@ class Makerfile():
         if settings.get("additional_flags"):
             self.variables["CCOPTION"] = " ".join(
                 settings.get("additional_flags"))
-            self.variables["FLAGS"] = "$(addprefix -,$(FLAGS)"
+            self.variables["FLAGS"] = "$(addprefix -,$(FLAGS))"
 
             var_string += "CCOPTION = {}\n".format(
                 self.variables.get("CCOPTION"))
