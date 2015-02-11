@@ -1,6 +1,7 @@
 import sys
 import os
 import glob
+import sublime
 
 
 class Makerfile():
@@ -37,6 +38,7 @@ class Makerfile():
 
         self.makefile += "\n\n{}\n".format(self.str_recipe_target())
 
+        self.makefile += self.str_make_clean()
         return self.makefile
 
     def handle_variable(self, settings):  # variable
@@ -146,6 +148,25 @@ class Makerfile():
         main_exe = string.format(
             self.variables.get("main_file"), objs, "$(BUILD_DIR)")
         return main_exe
+
+    def str_make_clean(self):
+        temp = "clean: \n\t"
+
+        del_command = "rm "
+
+        if sublime.platform() == 'windows':
+            del_command = "del /Q "
+
+        if bool(self.settings.get("clean")):
+            for i in self.settings.get("clean"):
+                if sublime.platform() != 'windows':
+                    i = i.replace('\\', '\\/')
+                temp += del_command + i + "\n\t"
+        else:
+            temp += del_command + "$(OBJ_DIR)'\/'*.o\n\t"
+            temp += del_command + "$(BUILD_DIR)'\/'*.exe\n"
+
+        return temp
 
     def get_source_files(self, src_dir):
         back_out = False
