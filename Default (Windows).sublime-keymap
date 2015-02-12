@@ -1,4 +1,9 @@
 [
     {"command": "cpp_builder", "keys": ["ctrl+alt+m"]} ,
-    {"command": "make_project", "keys": ["ctrl+alt+n"]}
+    {"command": "make_project", "keys": ["ctrl+alt+n"]},
+    {"command": "build_project", "keys": ["ctrl+alt+z"]},
+    {"command": "build_run_project", "keys": ["ctrl+alt+x"]},
+    {"command": "build_run_check_project", "keys": ["ctrl+alt+c"]},
+    {"command": "run_file_out", "keys": ["ctrl+alt+v"]},
+    {"command": "clean_project", "keys": ["shift+alt+b"]}
 ]

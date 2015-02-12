@@ -152,19 +152,28 @@ class Makerfile():
     def str_make_clean(self):
         temp = "clean: \n\t"
 
+        print(temp)
+
         del_command = "rm "
 
         if sublime.platform() == 'windows':
             del_command = "del /Q "
 
+        print(bool(self.settings.get("clean")))
         if bool(self.settings.get("clean")):
             for i in self.settings.get("clean"):
                 if sublime.platform() != 'windows':
                     i = i.replace('\\', '\\/')
                 temp += del_command + i + "\n\t"
         else:
-            temp += del_command + "$(OBJ_DIR)'\/'*.o\n\t"
-            temp += del_command + "$(BUILD_DIR)'\/'*.exe\n"
+            print('hello')
+            if sublime.platform() != 'windows':
+                print('hello2')
+                temp += del_command + "$(OBJ_DIR)'\/'*.o\n\t"
+                temp += del_command + "$(BUILD_DIR)'\/'*.exe\n"
+            else:
+                temp += del_command + "$(OBJ_DIR)\\*.o\n\t"
+                temp += del_command + "$(BUILD_DIR)\\*.exe\n"
 
         return temp
 
