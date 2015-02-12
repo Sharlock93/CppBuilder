@@ -114,7 +114,8 @@ These are the basic settings you can change:
 ```
 
 #Goals 
-- Running the Project after compiling.
+- Running the Project after compiling. (Done)
+- Building & Running a single C++ file. (New)
 - Just getting peole to use it and work out any bugs found ;)
 
 ##Update History
