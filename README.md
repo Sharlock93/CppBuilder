@@ -2,9 +2,14 @@
 
 Welcome
 ======
-This is my fist plugin
-A very Simple plugin to make Makefiles, still in pre-Alpha testing
-makes simple make files..
+This is my fist plugin so there might be bugs :)
+I have only tested this one windows thus far, Linux and Mac come later.
+
+This is a simple plugin that will generate a project folder for you, and will also generate a Makefile to use with GNU Make.
+It can also **Run** your project.
+
+This meant as a very simple project management system, there are bugs, and it can only handle one generated binary file.
+(Does that even make sense?!)
 
 Install
 ========
@@ -16,10 +21,18 @@ Use
 ======
 <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>M</kbd> <br/>While a C++ file is open will run the command on windows, Haven't tested it on Mac or Linux yet...
 the command will make a Makefile in the same directory of the C++ file.
+**Note**: so far I can only compile and run while in a project, i will add single file compile and run some other time.
 
-<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>N</kbd> <br/> While a Project is open and it should generate a Makefile for the project.
+#####Project
+goto **Project > C++ Builder > New C++ Project** to create a new project, an Input panel will come up and you can type in the name of your project, Then it will make the list of folders (build, header, obj, src), it will prompt you to agree for each folder, just click Yes to all of them. (This might be removed later.)
 
-You can Make a new C++ project by going to Project > New C++ Project, it will promot you to create some folders. (Might remove this later)
+######Keys (While new project is open)
+1. <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>N</kbd> : Generate Makefile (There must be at least one cpp file in your src folder).
+2. <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Z</kbd> : Build the Project (This will just run make in the folder).
+3. <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd> : Build & Run Project (No Input) (Running the project assuming there is no input required from the keyboard, useful for simple stuff).
+4. <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>V</kbd> : Build & Run (Console) (Running the project assuming it requires input, the output from the program is not captured by Sublime text, the Console window will pause).
+5. <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>X</kbd> : Build & Run Project (This will build the project, and runs the project as if double clicked on the generated binary directly).
+6. <kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>B</kbd> : Clean Project (Will run make clean).
 
 #####settings
 You have some options that you can change, either per project (I will explain down below) or for single files:
@@ -77,6 +90,12 @@ These are the basic settings you can change:
 
     //compiler
     "cc": "g++",
+    
+    //what to remove, example 'obj\*.o'
+    //this just a simple way to clean up, you can add
+    //more as required, remember, only supply what to delete
+    //the delete command is added internally based on platform
+    "clean" : [], 
 
 //============================================================
 
@@ -95,11 +114,18 @@ These are the basic settings you can change:
 ```
 
 #Goals 
-- Running the Project after compiling.
+- Running the Project after compiling. (Done)
+- Building & Running a single C++ file. (New)
 - Just getting peole to use it and work out any bugs found ;)
 
 ##Update History
-- v 0.0.11(New)
+- v 0.2.00 (New)
+    - Added Project Creation.
+    - Added Project Building.
+    - Added Project Execution.
+    - This could be the first version that has some uses. :D ( I will build it as I go along)
+
+- v 0.0.11
     -   lost local git folder, rebuild from scratch 
     -   added folder management.
 
