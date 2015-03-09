@@ -2,7 +2,7 @@ import sublime
 import sublime_plugin
 import os
 import json
-
+import sys
 from CppBuilder.MakerClass import Makerfile
 
 
@@ -13,13 +13,26 @@ class MakeProjectCommand(sublime_plugin.TextCommand):
         if settings:
             proj_base = self.view.window().folders()[0]
 
-            src = proj_base + "\\src"
+            src = proj_base
+            makefile = proj_base
+
+            if sys.platform.startswith('linux'):
+                src += "/src"
+                makefile += "/Makefile"
+            else:
+                 src += "\\src"
+                 makefile += "\\Makefile"
 
             maker = Makerfile(settings, src, "obj", "build", "header")
-            makefile = proj_base + "\\Makefile"
 
+            make_string = maker.make_file()
+
+            if sys.platform.startswith('linux'):
+                make_string = make_string.replace('\\', '/')
             f = open(makefile, "w")
-            f.write(maker.make_file())
+                
+            f.write(make_string)
+
             f.close()
 
             sublime.active_window().open_file(makefile)
@@ -30,6 +43,10 @@ class MakeProjectCommand(sublime_plugin.TextCommand):
         proj_name = os.path.basename(project_folder)
         setting_name = "\\{}.sublime-project".format(proj_name)
 
+        if sys.platform.startswith('linux'):
+            setting_name = setting_name.replace('\\', '/')
+
+        print(project_folder + setting_name)
         return self.load_json(project_folder + setting_name)
 
     def load_json(self, json_file):

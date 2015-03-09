@@ -22,6 +22,10 @@ class Makerfile():
         self.header = header
         self.sources = self.get_source_files(self.src)
         self.settings = settings
+        self.path_sep = '\\'
+
+        if sys.platform.startswith('linux'):
+            self.path_sep = '/'
 
     def make_file(self):
 
@@ -125,7 +129,7 @@ class Makerfile():
     def str_main_file(self):
         string = ""
         if self.build:
-            string += "{2}\\"  # build dir
+            string += "{2}" + self.path_sep # build dir
 
         string += "{0}: {1} \n\t $(CC) "
 
@@ -133,7 +137,7 @@ class Makerfile():
             string += "$(FLAGS) "
 
         if self.build:
-            string += "{1} -o {2}\\{0} "
+            string += "{1} -o {2}" + self.path_sep + "{0} "
         else:
             string += "{1} -o {0} "
 
@@ -152,25 +156,20 @@ class Makerfile():
     def str_make_clean(self):
         temp = "clean: \n\t"
 
-        print(temp)
-
         del_command = "rm "
 
         if sublime.platform() == 'windows':
             del_command = "del /Q "
 
-        print(bool(self.settings.get("clean")))
         if bool(self.settings.get("clean")):
             for i in self.settings.get("clean"):
                 if sublime.platform() != 'windows':
-                    i = i.replace('\\', '\\/')
+                    i = i.replace('\\', '/')
                 temp += del_command + i + "\n\t"
         else:
-            print('hello')
             if sublime.platform() != 'windows':
-                print('hello2')
-                temp += del_command + "$(OBJ_DIR)'\/'*.o\n\t"
-                temp += del_command + "$(BUILD_DIR)'\/'*.exe\n"
+                temp += del_command + "$(OBJ_DIR)/*.o\n\t"
+                temp += del_command + "$(BUILD_DIR)/*.out\n"
             else:
                 temp += del_command + "$(OBJ_DIR)\\*.o\n\t"
                 temp += del_command + "$(BUILD_DIR)\\*.exe\n"
@@ -181,7 +180,6 @@ class Makerfile():
         back_out = False
         if src_dir:
             try:
-                print(os.getcwd())
                 os.chdir(src_dir)
                 back_out = True
             except FileNotFoundError:
@@ -209,24 +207,24 @@ class Makerfile():
     def make_string_template(self):
         tmp = ""
         if self.obj:
-            tmp += "{2}\\"  # obj dir
+            tmp += "{2}" + self.path_sep  # obj dir
 
         tmp += "{0}: "  # object .o
 
         if self.src:
-            tmp += "{3}\\"  # src dir
+            tmp += "{3}" + self.path_sep  # src dir
 
         tmp += "{1} \n\t $(CC) $(FLAGS) -c "  # recipe for object
 
         # print(self.src)
 
         if self.src:
-            tmp += "{3}\\"
+            tmp += "{3}" + self.path_sep 
 
         tmp += "{1} "
 
         if self.obj:
-            tmp += "-o {2}\\{0} "
+            tmp += "-o {2}" + self.path_sep + "{0} "
         else:
             tmp += "-o {0} "
 

@@ -1,7 +1,7 @@
 import sublime
 import os
 import json
-
+import sys
 
 class ProjectHandler:
     # contains the workspace folder defined in settings file
@@ -41,6 +41,11 @@ class ProjectHandler:
 
     def add_folder(self, folder):
         folder_full_path = self.get_project_dir() + "\\" + folder
+
+        if sys.platform.startswith('linux'):
+            folder_full_path = folder_full_path.replace('\\', '/')
+
+        print(folder_full_path)
         self.make_dir(folder_full_path)
 
     def chmk_workspace_dir(self):
@@ -50,8 +55,9 @@ class ProjectHandler:
     def make_dir(self, dir_name):
         dir_exist = self.check_dirs(dir_name)
 
+
         if type(dir_exist) is str:
-            makes = sublime.ok_cancel_dialog(
+            makes =  sublime.ok_cancel_dialog(
                 "The directory '{}' doesnt exist.\
                 \n Want me to create the path?".format(dir_exist)
             )
@@ -67,6 +73,7 @@ class ProjectHandler:
                     sublime.error_message(
                         "Directory creation failed.\n Possible permission error."
                     )
+                    
                     return False
                 else:
                     sublime.status_message(
@@ -75,7 +82,7 @@ class ProjectHandler:
                     return True
 
             else:
-                sublime.status_message("Canceled by User.")
+                sublime.status_message("User Cancelled.")
                 return False
 
         return False
@@ -84,11 +91,13 @@ class ProjectHandler:
     def check_dirs(self, dirpath):
         # lets test every part of the path and check where we stop having a
         # folder
-        split_path = dirpath.split("\\")
+        split_path = self.split_paths(dirpath)
 
-        # due to some nonsense of python and cmd and os.chdir, always go back
-        # to the root of the drive
-        os.chdir("\\")
+        # an absoulte path, must start at root drive, (this needs more testing)
+        if sys.platform.startswith('linux'):
+            os.chdir('//')
+        elif sys.platform.startswith('win'):
+            os.chdir('\\')
 
         # returns true or folder name where the path stops existing
         if os.path.isdir(dirpath):
@@ -104,10 +113,29 @@ class ProjectHandler:
         return self.workspace_folder
 
     def get_project_dir(self):
-        return self.workspace_folder + "\\" + self.project_base_folder
+        wrkspacedir = self.workspace_folder + "\\" + self.project_base_folder
+        if sys.platform.startswith('linux'):
+            wrkspacedir = wrkspacedir.replace('\\', '/')
+
+        return wrkspacedir
 
     def mk_subl_proj(self):
         project_file_name = self.project_base_folder + ".sublime-project"
+        project_file_name = self.get_project_dir() + "\\" + project_file_name
 
-        with open(self.get_project_dir() + "\\" + project_file_name, "w") as f:
+        if sys.platform.startswith('linux'):
+            project_file_name = project_file_name.replace('\\', '/')
+
+
+        with open(project_file_name, "w") as f:
             json.dump(self.project_data, f, indent=4, sort_keys=True)
+    
+    def split_paths(self, path):
+        if sys.platform.startswith('linux'):
+            split = path.split('/')
+            split.remove('')
+            return split
+        
+        if sys.platform.startswith('win'):
+            split = path.split('\\')
+            return split

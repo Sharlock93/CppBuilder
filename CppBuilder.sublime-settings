@@ -34,6 +34,15 @@
     ],
 
 //============================================================
+//Linux Specific options:
+
+    //command that opens a new terminal
+    "terminal_emu":"x-terminal-emulator",
+    "terminal_opts": [
+        "-x"
+    ],
+
+//============================================================
 
     //additional flags for the compiler
     "additional_flags": [

@@ -11,11 +11,9 @@
                 [
                     { "command": "new_cpp", "caption": "New C++ Project" },
                     { "caption": "-" },
-                    { "command": "build_run_project"  , "caption": "Build & Run Project" },
                     { "command": "build_run_check_project"  , "caption": "Build & Run Project (No Input)" },
                     { "command": "run_file_out"  , "caption": "Run Project (Console)" },
                     { "command": "build_project", "caption": "Build Project"},
-                    { "command": "run_project"  , "caption": "Run Project" },
                     { "command": "clean_project", "caption": "Clean Project" },
                     { "caption": "-" },
                     { "command": "make_project", "caption":"Generate Makefile"}
