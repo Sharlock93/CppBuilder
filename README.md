@@ -19,7 +19,7 @@ Install
 
 Use
 ======
-<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>M</kbd> <br/>While a C++ file is open will run the command on windows, Haven't tested it on Mac or Linux yet...
+<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>M</kbd> <br/>While a C++ file is open will run the command on windows, Haven't tested it on Mac or ~~Linux~~ yet...
 the command will make a Makefile in the same directory of the C++ file.
 **Note**: so far I can only compile and run while in a project, i will add single file compile and run some other time.
 
@@ -30,9 +30,8 @@ goto **Project > C++ Builder > New C++ Project** to create a new project, an Inp
 1. <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>N</kbd> : Generate Makefile (There must be at least one cpp file in your src folder).
 2. <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Z</kbd> : Build the Project (This will just run make in the folder).
 3. <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd> : Build & Run Project (No Input) (Running the project assuming there is no input required from the keyboard, useful for simple stuff).
-4. <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>V</kbd> : Build & Run (Console) (Running the project assuming it requires input, the output from the program is not captured by Sublime text, the Console window will pause).
-5. <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>X</kbd> : Build & Run Project (This will build the project, and runs the project as if double clicked on the generated binary directly).
-6. <kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>B</kbd> : Clean Project (Will run make clean).
+4. <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>X</kbd> : Build & Run (Console) (Running the project assuming it requires input, the output from the program is not captured by Sublime text, the Console window will pause).
+5. <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>V</kbd> : Clean Project (Will run make clean).
 
 #####settings
 You have some options that you can change, either per project (I will explain down below) or for single files:
@@ -41,6 +40,8 @@ You have some options that you can change, either per project (I will explain do
 If you change the settings in ***project*.sublime-project** file, then the settings only apply to that project only, however if you change the **CppBuilder.sublime-settings**, the changes apply to every file. i.e: a file outside a project.
 
 **Note**: please set the workspace setting before anything else, this is required, for the New C++ Project command to work.
+
+**Note**: For Linux you must also set **terminal_emu** and **terminal_opts** for your own linux distro
 
 These are the basic settings you can change:
 ```javascript
@@ -99,6 +100,16 @@ These are the basic settings you can change:
 
 //============================================================
 
+//Linux Specific options:
+
+    //command that opens a new terminal
+    "terminal_emu":"x-terminal-emulator",
+    "terminal_opts": [
+        "-x"
+    ],
+
+//============================================================
+
     //additional flags for the compiler
     "additional_flags": [
         "Wall",
@@ -118,8 +129,14 @@ These are the basic settings you can change:
 - Building & Running a single C++ file. (New)
 - Just getting peole to use it and work out any bugs found ;)
 
+
 ##Update History
-- v 0.2.00 (New)
+- v 0.2.3 (New)
+    - Now should support Linux.
+    - Removed a few commands and Keyboard shortcuts as the where not required.
+
+##Update History
+- v 0.2.00 (Old)
     - Added Project Creation.
     - Added Project Building.
     - Added Project Execution.
